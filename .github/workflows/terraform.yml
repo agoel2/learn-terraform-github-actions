@@ -20,23 +20,35 @@ jobs:
           # terraform_version: 0.13.0:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
+      - name: Setup Terraform variables
+        id: vars
+        run: |-
+          cat > pipeline.auto.tfvars <<EOF
+          confluent_cloud_api_key = "${{ secrets.CC_API_KEY }}"
+          confluent_cloud_api_secret = "${{ secrets.CC_API_SECRET }}"
+          EOF
 
       - name: Terraform Init
         id: init
         run: terraform init
-      
+
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
+        env:
+          TF_VAR_confluent_cloud_api_key: ${{ secrets.CC_API_KEY }}
+          TF_VAR_confluent_cloud_api_secret: ${{ secrets.CC_API_SECRET }}
+
 
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false
         continue-on-error: true
+        env:
+          TF_VAR_confluent_cloud_api_key: ${{ secrets.CC_API_KEY }}
+          TF_VAR_confluent_cloud_api_secret: ${{ secrets.CC_API_SECRET }}
+
 
       - uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
@@ -74,3 +86,7 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
+        env:
+          TF_VAR_confluent_cloud_api_key: ${{ secrets.CC_API_KEY }}
+          TF_VAR_confluent_cloud_api_secret: ${{ secrets.CC_API_SECRET }}
+
