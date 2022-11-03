@@ -24,8 +24,8 @@ jobs:
         id: vars
         run: |-
           cat > pipeline.auto.tfvars <<EOF
-          confluent_cloud_api_key= ${{ secrets.CC_API_KEY }}
-          confluent_cloud_api_secret= ${{ secrets.CC_API_SECRET }}
+          confluent_cloud_api_key = "${{ secrets.CC_API_KEY }}"
+          confluent_cloud_api_secret = "${{ secrets.CC_API_SECRET }}"
           EOF
 
       - name: Terraform Format
